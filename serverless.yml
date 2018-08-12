@@ -1,0 +1,40 @@
+service: serverless-emailer
+
+frameworkVersion: ">=1.28.0 <2.0.0"
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  appName: serverless-emailer
+  
+provider:
+  name: aws
+  runtime: go1.x
+  stage: dev
+  region: ap-southeast-2
+  memorySize: 128
+  environment:
+    REGION: ${self:provider.region}
+  tags:
+    appName: ${self:custom.appName}
+    stage: ${self:custom.stage}
+    owner: tony.truong
+
+package:
+ exclude:
+   - ./**
+ include:
+   - ./bin/**
+
+functions:
+  email:
+    handler: bin/email
+    events:
+      - http:
+          path: email
+          method: post
+          cors: true  
+
+# Create our resources with separate CloudFormation templates
+resources:
+  # Cognito User Pool
+  - ${file(resources/cognito-user-pool.yml)}
