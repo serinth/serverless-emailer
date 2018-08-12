@@ -33,8 +33,3 @@ functions:
           path: email
           method: post
           cors: true  
-
-# Create our resources with separate CloudFormation templates
-resources:
-  # Cognito User Pool
-  - ${file(resources/cognito-user-pool.yml)}
