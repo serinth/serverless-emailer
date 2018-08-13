@@ -1,0 +1,4 @@
+HystrixTimeout = 20000
+HystrixMaxConcurrentRequests = 64
+HystrixErrorPercentThreshold = 32
+MetricsCommandName = "EmailerAPICall"

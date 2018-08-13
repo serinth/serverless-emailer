@@ -4,8 +4,12 @@ Work In Progress
 
 
 # TODO
-- [] Internationalization (i18n)
-- [] Authentication
+- [ ] Validate BCC and CC duplicates and return warning
+- [ ] Internationalization (i18n)
+- [ ] Authentication
+- [ ] Analytics
+- [ ] A/B Testing, Experimentation and Feature Flagging
+- [ ] Vault Secrets
 
 # Deployment
 

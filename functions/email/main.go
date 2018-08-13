@@ -6,9 +6,11 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/serinth/serverless-emailer/api"
 	"github.com/serinth/serverless-emailer/validators"
-	"os"
-
 	"net/http"
+	"github.com/afex/hystrix-go/hystrix"
+	"github.com/serinth/serverless-emailer/util"
+	log "github.com/sirupsen/logrus"
+	"os"
 )
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -20,7 +22,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	requestErrors := validators.GetSendEmailRequestErrors(req)
-	if len(requestErrors) > 0 {
+	if requestErrors != nil {
 		invalidRequestResponse, _ := json.Marshal(api.InvalidEmailRequest(requestErrors))
 		return api.NewResponseBuilder().
 			Body(string(invalidRequestResponse)).
@@ -36,14 +38,24 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		Build(), nil
 }
 
-func main() {
-	stage := os.Getenv("STAGE")
+var cfg *util.Config
 
-	if len(stage) == 0 {
-		panic("Error! Mandatory STAGE environment variable not set!")
+func main() {
+
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+
+	cfg = util.LoadConfig()
+
+	hystrixConfig := hystrix.CommandConfig{
+		Timeout:               cfg.HystrixTimeout,
+		MaxConcurrentRequests: cfg.HystrixMaxConcurrentRequests,
+		ErrorPercentThreshold: cfg.HystrixErrorPercentThreshold,
 	}
 
-	if stage == "local" {
+	hystrix.ConfigureCommand(cfg.MetricsCommandName, hystrixConfig)
+
+	if cfg.Stage == "local" {
 		local()
 	} else {
 		lambda.Start(Handler)

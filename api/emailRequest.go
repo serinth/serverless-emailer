@@ -1,10 +1,15 @@
 package api
 
+type Address struct {
+	Name  *string `json:"name,omitempty"`
+	Email *string `json:"email,omitempty"`
+}
+
 type SendEmailRequest struct {
-	To      *string   `json:"to,omitempty"`
-	From    *string   `json:"from,omitempty"`
-	CC      []*string `json:"cc,omitempty"`
-	BCC     []*string `json:"bcc,omitempty"`
+	To      []*Address `json:"to,omitempty"`
+	From    *Address   `json:"from,omitempty"`
+	CC      []*Address `json:"cc,omitempty"`
+	BCC     []*Address `json:"bcc,omitempty"`
 	Subject *string   `json:"subject,omitempty"`
 	Content *string   `json:"content,omitempty"`
 }
