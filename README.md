@@ -9,7 +9,8 @@ Work In Progress
 - [ ] Authentication
 - [ ] Analytics
 - [ ] A/B Testing, Experimentation and Feature Flagging
-- [ ] Vault Secrets
+- [ ] Vault Secrets Codified instead of ENV variables
+- [ ] Take advantage of SendGrid's personalizations, right now only globally setting subjects and content
 
 # Deployment
 
@@ -33,7 +34,18 @@ This will aggregate all the lambda function logs and executions into one stream 
     npm install -g serverless
 ```
 
-## 3. - Run Serverless Deployment
+## 3. Store API Secrets in Encrypted AWS SSM Parameter Store
+This application uses [mailgun](https://www.mailgun.com) and [SendGrid](https://sendgrid.com) for sending emails.
+Sign up and acquire the necessary API Keys.
+
+e.g.
+```bash
+    # replace "dev" with the appropriate environment. See serverless.yml.
+    aws ssm put-parameter --name '/serverless-emailer/thirdparty/sendgrid/dev/apikey' --type "SecureString" --value '<API KEY>'
+    aws ssm put-parameter --name '/serverless-emailer/thirdparty/mailgun/dev/apikey' --type "SecureString" --value '<API KEY>'
+```
+
+## 4. Run Serverless Deployment
 
 ```bash
     serverless deploy -v --aws-profile TEMPSESSION
@@ -42,6 +54,14 @@ This will aggregate all the lambda function logs and executions into one stream 
 # Testing The EndPoint
 
 
+# Running Locally
+
+```bash
+    STAGE=local \ 
+    SENDGRID_API_KEY='key' \
+    MAILGUN_API_KEY='key' \
+    go run email.go main.go
+```
 
 # Clean Up
 

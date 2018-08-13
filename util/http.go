@@ -40,11 +40,12 @@ func HystrixPost(
 	}
 
 	resultChannel := make(chan string, 1)
+
 	errChannel := hystrix.Go(commandName, func() error {
 		response, e := client.Do(req)
 		defer response.Body.Close()
 
-		log.Debugf("Sent %s request to: %s with body: %s", method, url, data)
+		log.Infof("Sent %s request to: %s with body: %s", method, url, data)
 
 		if e != nil {
 			return e
@@ -64,9 +65,9 @@ func HystrixPost(
 	}, fallback)
 
 	select {
-	case result := <- resultChannel:
+	case result := <-resultChannel:
 		log.Info(result)
-	case err := <- errChannel:
+	case err := <-errChannel:
 		log.Warnf("Hystrix failure with error: %v", err)
 		return err
 	}

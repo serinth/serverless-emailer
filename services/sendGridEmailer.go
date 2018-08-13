@@ -2,29 +2,75 @@ package services
 
 import (
 	"bytes"
-	"fmt"
+	"encoding/json"
+	"github.com/serinth/serverless-emailer/api"
 	"github.com/serinth/serverless-emailer/util"
 	"net/http"
-	"github.com/serinth/serverless-emailer/api"
 )
 
-func NewSendGridEmailer(apiKey string, url string) Emailer {
+func NewSendGridEmailer(apiKey string, url string, context string) Emailer {
 	return &EmailerService{
-		apiKey: apiKey,
-		url:    url,
-		isHTML: false,
+		apiKey:  apiKey,
+		url:     url,
+		isHTML:  false,
+		context: context,
 	}
 }
 
+// https://sendgrid.com/docs/API_Reference/api_v3.html
+
+type sendGridAddress struct {
+	Name  string `json:"name,omitempty"`
+	Email string `json:"email"`
+}
+
+type sendGridContent struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
+type personalizations struct {
+	To  []*sendGridAddress `json:"to"`
+	CC  []*sendGridAddress `json:"cc,omitempty"`
+	BCC []*sendGridAddress `json:"bcc,omitempty"`
+}
+
+type sendGridRequest struct {
+	Personalizations []*personalizations `json:"personalizations"`
+	Subject          string              `json:"subject"`
+	From             *sendGridAddress    `json:"from"`
+	Content          []*sendGridContent  `json:"content"`
+}
+
 func (s *EmailerService) Send() error {
-	// TODO serialize this instead of building a string, placeholder
-	data := []byte(fmt.Sprintf(`{"personalizations": [{"to": [{"email": "example@example.com"}]}],"from": {"email": "example@example.com"},"subject": "Hello, World!","content": [{"type": "text/plain", "value": "Heya!"}]}`))
+	from := &sendGridAddress{Email: *s.from.Email}
+	if s.from.Name != nil {
+		from.Name = *s.from.Name
+	}
+
+	req := &sendGridRequest{
+		Personalizations: []*personalizations{
+			{
+				To:  mapApiAddressToSendGridAddresses(s.to),
+				CC:  mapApiAddressToSendGridAddresses(s.cc),
+				BCC: mapApiAddressToSendGridAddresses(s.bcc),
+			},
+		},
+		From:    from,
+		Subject: s.subject,
+		Content: []*sendGridContent{
+			{Type: "text/plain", Value: s.content},
+		},
+	}
+
+	data, _ := json.Marshal(req)
+
 	err := util.HystrixPost(
 		http.MethodPost,
 		s.url,
 		bytes.NewBuffer(data),
 		util.AuthCredentials{IsBasicAuth: false, APIKey: s.apiKey},
-		"SendGridRequest",
+		s.context,
 		nil,
 	)
 
@@ -33,6 +79,21 @@ func (s *EmailerService) Send() error {
 	}
 
 	return nil
+}
+
+func mapApiAddressToSendGridAddresses(addresses []*api.Address) []*sendGridAddress {
+	var sendGridAddresses []*sendGridAddress
+	for _, a := range addresses {
+		sendGridAddress := &sendGridAddress{Email: *a.Email}
+
+		if a.Name != nil {
+			sendGridAddress.Name = *a.Name
+		}
+
+		sendGridAddresses = append(sendGridAddresses, sendGridAddress)
+	}
+
+	return sendGridAddresses
 }
 
 func (s *EmailerService) To(addresses []*api.Address) *EmailerService {

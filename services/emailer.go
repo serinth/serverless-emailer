@@ -12,6 +12,7 @@ type EmailerService struct {
 	isHTML  bool
 	apiKey  string
 	url     string
+	context string
 }
 
 type Emailer interface {

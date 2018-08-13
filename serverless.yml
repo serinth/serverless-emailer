@@ -5,6 +5,14 @@ frameworkVersion: ">=1.28.0 <2.0.0"
 custom:
   stage: ${opt:stage, self:provider.stage}
   appName: serverless-emailer
+  sendGridAPIKey:
+    local: testkey 
+    dev: ${ssm:/serverless-emailer/thirdparty/sendgrid/dev/apikey~true} # retrieve encrypted key store
+    prod: ${ssm:/serverless-emailer/thirdparty/sendgrid/prod/apikey~true}
+  mailgunAPIKey:
+    local: testkey
+    dev: ${ssm:/serverless-emailer/thirdparty/mailgun/dev/apikey~true}
+    prod: ${ssm:/serverless-emailer/thirdparty/mailgun/prod/apikey~true}
   
 provider:
   name: aws
@@ -14,6 +22,9 @@ provider:
   memorySize: 128
   environment:
     REGION: ${self:provider.region}
+    STAGE: ${self:custom.stage}
+    SENDGRID_API_KEY: ${self:custom.sendGridAPIKey.${self:custom.stage}}
+    MAILGUN_API_KEY: ${self:custom.mailgunAPIKey.${self:custom.stage}}
   tags:
     appName: ${self:custom.appName}
     stage: ${self:custom.stage}

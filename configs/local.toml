@@ -2,3 +2,5 @@ HystrixTimeout = 20000
 HystrixMaxConcurrentRequests = 64
 HystrixErrorPercentThreshold = 32
 MetricsCommandName = "EmailerAPICall"
+SendGridURL = "https://api.sendgrid.com/v3/mail/send"
+MailGunURL = "url"

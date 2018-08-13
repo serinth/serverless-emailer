@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/BurntSushi/toml"
+  packages = ["."]
+  revision = "b26d9c308763d68093482582cea63d69be07a0f0"
+  version = "v0.3.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/afex/hystrix-go"
   packages = [
@@ -21,6 +27,12 @@
   ]
   revision = "4d30d0ff60440c2d0480a15747c96ee71c3c53d4"
   version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/caarlos0/env"
+  packages = ["."]
+  revision = "1cddc31c48c56ecd700d873edb9fd5b6f5df922a"
+  version = "v3.3.0"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -64,6 +76,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dc8eb3bda6842551cc258891c2cdf60869193876b2f065769cca5caa05310259"
+  inputs-digest = "928b9da4b84d7ad02e9c2c09e8e07403780ec2967d3fb38fafc98c8cec7c20c0"
   solver-name = "gps-cdcl"
   solver-version = 1

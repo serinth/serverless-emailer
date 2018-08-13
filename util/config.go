@@ -15,7 +15,9 @@ type Config struct {
 	HystrixErrorPercentThreshold int    `env:"HYSTRIX_ERROR_THRESHOLD"`
 	MetricsCommandName           string `env:"METRICS_COMMAND_NAME"`
 	SendGridAPIKey               string `env:"SENDGRID_API_KEY,required"`
+	SendGridURL                  string `env:"SENDGRID_URL"`
 	MailGunAPIKey                string `env:"MAILGUN_API_KEY,required"`
+	MailGunURL                   string `env:"MAILGUN_URL"`
 }
 
 func LoadConfig() *Config {
