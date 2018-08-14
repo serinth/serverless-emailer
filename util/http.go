@@ -1,12 +1,12 @@
 package util
 
 import (
-	"fmt"
 	"github.com/afex/hystrix-go/hystrix"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"fmt"
 )
 
 type AuthCredentials struct {
@@ -22,6 +22,7 @@ func HystrixPost(
 	data io.Reader,
 	auth AuthCredentials,
 	commandName string,
+	mimeType string,
 	fallback func(err error) error) error {
 
 	client := &http.Client{}
@@ -31,7 +32,7 @@ func HystrixPost(
 		log.Panic("create new request object with error: %v", err)
 	}
 
-	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Type", mimeType)
 
 	if auth.IsBasicAuth {
 		req.SetBasicAuth(auth.User, auth.Password)

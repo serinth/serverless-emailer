@@ -8,8 +8,21 @@ import (
 	"net/http"
 )
 
+type sendGridEmailerService struct {
+	to      []*api.Address
+	from    *api.Address
+	cc      []*api.Address
+	bcc     []*api.Address
+	subject string
+	content string
+	isHTML  bool
+	apiKey  string
+	url     string
+	context string
+}
+
 func NewSendGridEmailer(apiKey string, url string, context string) Emailer {
-	return &EmailerService{
+	return &sendGridEmailerService{
 		apiKey:  apiKey,
 		url:     url,
 		isHTML:  false,
@@ -42,7 +55,7 @@ type sendGridRequest struct {
 	Content          []*sendGridContent  `json:"content"`
 }
 
-func (s *EmailerService) Send() error {
+func (s *sendGridEmailerService) Send() error {
 	from := &sendGridAddress{Email: *s.from.Email}
 	if s.from.Name != nil {
 		from.Name = *s.from.Name
@@ -71,6 +84,7 @@ func (s *EmailerService) Send() error {
 		bytes.NewBuffer(data),
 		util.AuthCredentials{IsBasicAuth: false, APIKey: s.apiKey},
 		s.context,
+		"application/json",
 		nil,
 	)
 
@@ -96,42 +110,42 @@ func mapApiAddressToSendGridAddresses(addresses []*api.Address) []*sendGridAddre
 	return sendGridAddresses
 }
 
-func (s *EmailerService) To(addresses []*api.Address) *EmailerService {
+func (s *sendGridEmailerService) To(addresses []*api.Address) Emailer {
 	s.to = addresses
 	return s
 }
 
-func (s *EmailerService) From(address *api.Address) *EmailerService {
+func (s *sendGridEmailerService) From(address *api.Address) Emailer {
 	s.from = address
 	return s
 }
 
-func (s *EmailerService) CC(addresses []*api.Address) *EmailerService {
+func (s *sendGridEmailerService) CC(addresses []*api.Address) Emailer {
 	s.cc = addresses
 	return s
 }
 
-func (s *EmailerService) BCC(addresses []*api.Address) *EmailerService {
+func (s *sendGridEmailerService) BCC(addresses []*api.Address) Emailer {
 	s.bcc = addresses
 	return s
 }
 
-func (s *EmailerService) Subject(subject *string) *EmailerService {
+func (s *sendGridEmailerService) Subject(subject *string) Emailer {
 	s.subject = *subject
 	return s
 }
 
-func (s *EmailerService) Content(content *string) *EmailerService {
+func (s *sendGridEmailerService) Content(content *string) Emailer {
 	s.content = *content
 	return s
 }
 
-func (s *EmailerService) SetAPIKey(key string) *EmailerService {
+func (s *sendGridEmailerService) SetAPIKey(key string) Emailer {
 	s.apiKey = key
 	return s
 }
 
-func (s *EmailerService) SetUrl(url string) *EmailerService {
+func (s *sendGridEmailerService) SetUrl(url string) Emailer {
 	s.url = url
 	return s
 }

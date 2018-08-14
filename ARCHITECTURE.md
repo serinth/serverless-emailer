@@ -7,11 +7,13 @@
 - will automatically scale to number of requests, subject to account limits
 - no infrastructure or OS security management
 - writing it in Go allows for moving it to Kubernetes later with small container sizes and to keep most of the code. It's easier to assemble from smaller functions than it is to break a monolith
+- versioning is intrinsic to lambda functions and there are also aliases to point to specific functions. It does not version lock from a consumer perspective.
 
 ### Cons
 - better to use full running VMs (standalone or in a Kubernetes cluster) when functions are of high volume
 - response time is subject to lambda warm up times and even then will not run as fast as a Go pod
 - packaging size is large (relatively) if the solution grows too big
+
 
 ## Alternatives
 Depending on team skills, size and microservices architectures in place, I could have used: 
@@ -33,14 +35,18 @@ If we're really at this point, I wouldn't even use a third party service for ema
 - Log aggregation should be implemented e.g. Splunk, ElasticSearch, Logz.io, Sumo Logic etc. So that monitoring can be implemented for odd behaviour and alerts can be made for critical system failures.
 - Support plans for each product should be agreed upon to ensure we do not break any SLAs and have a formal process for rollback procedures
 
-# Additional Nice To Haves
+# Additional Nice To Haves Given More Time
+The bullet points below plus the TODOs on the README.md
+
 - service discovery for queue and service names
-- secrets management e.g. Hashicorp's Vault for managing and rotating keys
 - analytics platform to push statistics and data to which would power;
     - A/B testing to minimize risk when rolling out and testing major changes
     - Experimentation for a subset of the population for fine grained feature testing. Also a risk mitigation exercise.
     - Feature Flagging (can be combined with the above)
 - SendGrid and MailGun provide a bounces API which we can use to collect data on
+
+# Domain Verification
+- ensure to follow the integration parties' documentation to verify the domain so that DKIM, SPF works and emails are less likely to land in the spam box
 
 # Email Regex
 There is a trade off between complex regex for input validation and simple ones. The upkeep larger regex patterns and the ever changing domain names is difficult and not necessary. The only real way to test is to just send the email and deal with repeatedly failed ones differently.

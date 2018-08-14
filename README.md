@@ -4,13 +4,15 @@ Work In Progress
 
 
 # TODO
+- [x] SendGrid Integration (plain/text only)
+- [x] Mailgun Integration (plain/text only)
 - [ ] Validate BCC and CC duplicates and return warning
-- [ ] Internationalization (i18n)
-- [ ] Authentication
+- [ ] Authentication w/ API Key Throttling
 - [ ] Analytics
 - [ ] A/B Testing, Experimentation and Feature Flagging
-- [ ] Vault Secrets Codified instead of ENV variables
 - [ ] Take advantage of SendGrid's personalizations, right now only globally setting subjects and content
+- [ ] Store Circuit Breaker state in a persistent store
+
 
 # Deployment
 
@@ -56,11 +58,10 @@ e.g.
 
 # Running Locally
 
+Override the file defaults with these required environmental variables. Replace accordingly.
+
 ```bash
-    STAGE=local \ 
-    SENDGRID_API_KEY='key' \
-    MAILGUN_API_KEY='key' \
-    go run email.go main.go
+    STAGE=local SENDGRID_API_KEY='key' MAILGUN_API_KEY='key' MAILGUN_URL='mysandbox' go run functions/email/*.go
 ```
 
 # Clean Up
@@ -75,3 +76,7 @@ e.g.
 [AWS Amplify](https://github.com/aws/aws-amplify) - for the UI SDK to sign up and sign in users.
 
 [Splunk Log Forwarder Blueprint](https://ap-southeast-2.console.aws.amazon.com/lambda/home?region=ap-southeast-2#/create/new?bp=splunk-logging) - log aggregation
+
+[SendGrid](https://sendgrid.com)
+
+[mailgun](https://www.mailgun.com)
