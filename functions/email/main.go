@@ -2,16 +2,18 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/afex/hystrix-go/hystrix"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/serinth/serverless-emailer/api"
-	"github.com/serinth/serverless-emailer/validators"
-	"net/http"
-	"github.com/afex/hystrix-go/hystrix"
 	"github.com/serinth/serverless-emailer/util"
+	"github.com/serinth/serverless-emailer/validators"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 	"os"
 )
+
+var cfg *util.Config
 
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
@@ -30,15 +32,19 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			Build(), nil
 	}
 
-	//TODO actually send the email here with fallback and circuitbreaker
+	if err := sendEmail(&req, cfg); err != nil {
+		internalErrorResponse, _ := json.Marshal(api.InternalError(err.Error()))
+		return api.NewResponseBuilder().
+			Body(string(internalErrorResponse)).
+			Status(http.StatusInternalServerError).
+			Build(), nil
+	}
 
 	return api.NewResponseBuilder().
 		Body("OK").
 		Status(http.StatusOK).
 		Build(), nil
 }
-
-var cfg *util.Config
 
 func main() {
 

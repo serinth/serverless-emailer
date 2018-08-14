@@ -1,11 +1,12 @@
 package main
 
 import (
-	//"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/serinth/serverless-emailer/api"
 	"github.com/serinth/serverless-emailer/services"
 	"github.com/serinth/serverless-emailer/util"
+	log "github.com/sirupsen/logrus"
 )
 
 func local() {
@@ -30,17 +31,26 @@ func local() {
 		BCC:     nil,
 	}
 
-	//localTestSendGrid(req, cfg)
+	emailUsingSendGrid(req, cfg)
 
-	localTestMailgun(req, cfg)
+	emailUsingMailgun(req, cfg)
 
 }
 
-func sendEmail(r api.SendEmailRequest) error {
+func sendEmail(req *api.SendEmailRequest, cfg *util.Config) error {
+	if err := emailUsingSendGrid(req, cfg); err != nil {
+		log.Errorf("Email with SendGrid Failed with error: %v", err)
+		fallbackErr := emailUsingMailgun(req, cfg)
+		if fallbackErr != nil {
+			log.Errorf("Fallback with Mailgun failed with error: %v", fallbackErr)
+			return errors.New("Critical failure with SendGrid and Mailgun")
+		}
+	}
+
 	return nil
 }
 
-func localTestSendGrid(req *api.SendEmailRequest, cfg *util.Config) {
+func emailUsingSendGrid(req *api.SendEmailRequest, cfg *util.Config) error {
 	emailer := services.NewSendGridEmailer(cfg.SendGridAPIKey, cfg.SendGridURL, cfg.MetricsCommandName)
 	err := emailer.
 		To(req.To).
@@ -49,10 +59,10 @@ func localTestSendGrid(req *api.SendEmailRequest, cfg *util.Config) {
 		Content(req.Content).
 		Send()
 
-	fmt.Println("Error if any: %v", err)
+	return err
 }
 
-func localTestMailgun(req *api.SendEmailRequest, cfg *util.Config) {
+func emailUsingMailgun(req *api.SendEmailRequest, cfg *util.Config) error {
 	emailer := services.NewMailgunEmailer(cfg.MailGunAPIKey, cfg.MailGunURL, cfg.MetricsCommandName)
 	err := emailer.
 		To(req.To).
@@ -61,5 +71,5 @@ func localTestMailgun(req *api.SendEmailRequest, cfg *util.Config) {
 		Content(req.Content).
 		Send()
 
-	fmt.Println("Error if any: %v", err)
+	return err
 }
