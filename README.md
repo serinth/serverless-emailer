@@ -59,7 +59,7 @@ This will build Linux ELF binaries with the addition of the configs folder so th
 ## 5. Run Serverless Deployment
 
 ```bash
-    serverless deploy -v --aws-profile TEMPSESSION
+    serverless deploy -v --aws-profile <Profile>
 ```
 
 # Testing The EndPoint
@@ -76,7 +76,7 @@ Override the file defaults with these required environmental variables. Replace 
 # Clean Up
 
 ```bash
-    serverless remove -v --aws-profile TEMPSESSION
+    serverless remove -v --aws-profile <Profile>
 ```
 
 # References

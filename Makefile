@@ -8,7 +8,7 @@ help:   ## show this help
 
 clean-all:	## Go Clean
 	go clean
-	rm -r bin/*
+	rm -rf ./bin/*
 
 test:	## Run Unit Tests
 	go test -v ./... -short
@@ -16,8 +16,7 @@ test:	## Run Unit Tests
 test-integration: ## Run Integration TEsts
 	go test -v ./...
 
-build: ## Run dep ensure and build linux binary of all individual functions
-    rm bin/configs/*
+build: clean-all ## Run dep ensure and build linux binary of all individual functions
 	cp -R ./configs bin/configs
 	dep ensure
-	env GOOS=linux go build -ldflags="-s -w" -o bin/email functions/email/main.go
+	env GOOS=linux go build -ldflags="-s -w" -o bin/email functions/email/*.go
