@@ -47,7 +47,16 @@ e.g.
     aws ssm put-parameter --name '/serverless-emailer/thirdparty/mailgun/dev/apikey' --type "SecureString" --value '<API KEY>'
 ```
 
-## 4. Run Serverless Deployment
+## 4. Build the lambda binaries
+
+This will build Linux ELF binaries with the addition of the configs folder so the proper environment configs can be taken.
+**Note** configs in `util/config.go` pull the defaults from the configs/<env>.toml files then if the environment variable is set, it will override the defaults.
+
+```bash
+    make build
+```
+
+## 5. Run Serverless Deployment
 
 ```bash
     serverless deploy -v --aws-profile TEMPSESSION
