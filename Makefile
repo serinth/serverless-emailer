@@ -17,6 +17,5 @@ test-integration: ## Run Integration TEsts
 	go test -v ./...
 
 build: clean-all ## Run dep ensure and build linux binary of all individual functions
-	cp -R ./configs bin/configs
 	dep ensure
 	env GOOS=linux go build -ldflags="-s -w" -o bin/email functions/email/*.go

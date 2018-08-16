@@ -13,62 +13,38 @@ func local() {
 
 	fmt.Println("Running Locally...")
 
-	cfg = util.LoadConfig()
-
-	to := "serinth+test1@gmail.com"
-	from := "postmaster@sandboxfd35f37be9664c8abfc2f2cdb66a6961.mailgun.org"
-	subject := "test"
-	content := "test content"
-
-	req := &api.SendEmailRequest{
-		To: []*api.Address{
-			{nil, &to},
-		},
-		From:    &api.Address{Name: nil, Email: &from},
-		Subject: &subject,
-		Content: &content,
-		CC:      nil,
-		BCC:     nil,
-	}
-
-	emailUsingSendGrid(req, cfg)
-
-	emailUsingMailgun(req, cfg)
+	// test code locally
 
 }
 
 func sendEmail(req *api.SendEmailRequest, cfg *util.Config) error {
-	if err := emailUsingSendGrid(req, cfg); err != nil {
-		log.Errorf("Email with SendGrid Failed with error: %v", err)
-		fallbackErr := emailUsingMailgun(req, cfg)
+	sendGridEmailer := services.NewSendGridEmailer(cfg.SendGridAPIKey, cfg.SendGridURL, cfg.MetricsCommandName)
+	mailgunEmailer := services.NewMailgunEmailer(cfg.MailGunAPIKey, cfg.MailGunURL, cfg.MetricsCommandName)
+
+	return sendEmailWithFallback(req, sendGridEmailer, mailgunEmailer)
+}
+
+func sendEmailWithFallback(req *api.SendEmailRequest, primaryEmailService services.Emailer, secondaryEmailService services.Emailer) error {
+	if err := sendEmailFromRequest(primaryEmailService, req); err != nil {
+		log.Errorf("Primary Emailer Failed with error: %v", err)
+		fallbackErr := sendEmailFromRequest(secondaryEmailService, req)
 		if fallbackErr != nil {
-			log.Errorf("Fallback with Mailgun failed with error: %v", fallbackErr)
-			return errors.New("Critical failure with SendGrid and Mailgun")
+			log.Errorf("Fallback Emailer failed with error: %v", fallbackErr)
+			return errors.New("Critical failure with Primary and Secondary emailers")
 		}
 	}
 
 	return nil
 }
 
-func emailUsingSendGrid(req *api.SendEmailRequest, cfg *util.Config) error {
-	emailer := services.NewSendGridEmailer(cfg.SendGridAPIKey, cfg.SendGridURL, cfg.MetricsCommandName)
+func sendEmailFromRequest(emailer services.Emailer, req *api.SendEmailRequest) error {
 	err := emailer.
 		To(req.To).
 		From(req.From).
 		Subject(req.Subject).
 		Content(req.Content).
-		Send()
-
-	return err
-}
-
-func emailUsingMailgun(req *api.SendEmailRequest, cfg *util.Config) error {
-	emailer := services.NewMailgunEmailer(cfg.MailGunAPIKey, cfg.MailGunURL, cfg.MetricsCommandName)
-	err := emailer.
-		To(req.To).
-		From(req.From).
-		Subject(req.Subject).
-		Content(req.Content).
+		CC(req.CC).
+		BCC(req.BCC).
 		Send()
 
 	return err

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"fmt"
+	"errors"
 )
 
 type AuthCredentials struct {
@@ -56,6 +57,7 @@ func HystrixPost(
 
 		if !(response.StatusCode >= 200 && response.StatusCode < 300) {
 			log.Warnf("Request did not return success with status: %s, %d", body, response.StatusCode)
+			return errors.New(string(body))
 		}
 
 		log.Debugf("Request returned with response: %s", body)

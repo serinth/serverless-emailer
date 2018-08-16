@@ -2,6 +2,8 @@ package services
 
 import "github.com/serinth/serverless-emailer/api"
 
+//go:generate moq -out emailer_mock.go . Emailer
+
 type Emailer interface {
 	Send() error
 	To(addresses []*api.Address) Emailer

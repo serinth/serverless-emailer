@@ -9,11 +9,15 @@ custom:
   sendGridAPIKey:
     local: testkey 
     dev: ${ssm:/serverless-emailer/thirdparty/sendgrid/dev/apikey~true} # retrieve encrypted key store
-    prod: ${ssm:/serverless-emailer/thirdparty/sendgrid/prod/apikey~true}
+    prod: prodkey #${ssm:/serverless-emailer/thirdparty/sendgrid/prod/apikey~true}
   mailgunAPIKey:
     local: testkey
     dev: ${ssm:/serverless-emailer/thirdparty/mailgun/dev/apikey~true}
-    prod: ${ssm:/serverless-emailer/thirdparty/mailgun/prod/apikey~true}
+    prod: prodkey #${ssm:/serverless-emailer/thirdparty/mailgun/prod/apikey~true}
+  mailgunURL:
+    local: "url"
+    dev: "url"
+    prod: "url"
   
 provider:
   name: aws
@@ -24,8 +28,15 @@ provider:
   environment:
     REGION: ${self:provider.region}
     STAGE: ${self:custom.stage}
+    SENDGRID_URL: "https://api.sendgrid.com/v3/mail/send"
     SENDGRID_API_KEY: ${self:custom.sendGridAPIKey.${self:custom.stage}}
+    MAILGUN_URL: ${self:custom.mailgunURL.${self:custom.stage}}
     MAILGUN_API_KEY: ${self:custom.mailgunAPIKey.${self:custom.stage}}
+    METRICS_COMMAND_NAME: "EmailerAPICall"
+    HYSTRIX_TIMEOUT: "20000"
+    HYSTRIX_MAX_CONCURRENT_REQUESTS: "64"
+    HYSTRIX_ERROR_THRESHOLD: "32"
+
   tags:
     appName: ${self:custom.appName}
     stage: ${self:custom.stage}

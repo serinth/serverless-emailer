@@ -12,6 +12,7 @@ Work In Progress
 - [ ] A/B Testing, Experimentation and Feature Flagging
 - [ ] Take advantage of SendGrid's personalizations, right now only globally setting subjects and content
 - [ ] Store Circuit Breaker state in a persistent store
+- [ ] Read config files from S3 instead of file (filesystem wouldn't work as is but code is there for kubernetes type deployments with an accessible file system)
 
 
 # Deployment
@@ -36,16 +37,19 @@ This will aggregate all the lambda function logs and executions into one stream 
     npm install -g serverless
 ```
 
-## 3. Store API Secrets in Encrypted AWS SSM Parameter Store
+## 3. Store API Secrets and Configs in Encrypted AWS SSM Parameter Store
 This application uses [mailgun](https://www.mailgun.com) and [SendGrid](https://sendgrid.com) for sending emails.
 Sign up and acquire the necessary API Keys.
 
+Securely store the keys and ensure that the region is the same one as where the lambda functions are deployed.
 e.g.
 ```bash
     # replace "dev" with the appropriate environment. See serverless.yml.
-    aws ssm put-parameter --name '/serverless-emailer/thirdparty/sendgrid/dev/apikey' --type "SecureString" --value '<API KEY>'
-    aws ssm put-parameter --name '/serverless-emailer/thirdparty/mailgun/dev/apikey' --type "SecureString" --value '<API KEY>'
+    aws --region <REGION> ssm put-parameter --name '/serverless-emailer/thirdparty/sendgrid/dev/apikey' --type "SecureString" --value '<API KEY>'
+    aws --region <REGION> ssm put-parameter --name '/serverless-emailer/thirdparty/mailgun/dev/apikey' --type "SecureString" --value '<API KEY>'
 ```
+**Note**
+Not having the SSM keys must exist if you're referencing them in the `serverless.yaml` file. Otherwise deployments will fail.
 
 ## 4. Build the lambda binaries
 
@@ -64,6 +68,12 @@ This will build Linux ELF binaries with the addition of the configs folder so th
 
 # Testing The EndPoint
 
+Example simple email below with one recipient. Add more objects of the same type to the array. 
+`cc` and `bcc` fields can additionally be added with the same array type as the `to` field.
+
+```bash
+curl -H "Content-Type: application/json" -X POST -d '{"to": [{"name":"Tony", "email":"serinth@gmail.com"}], "from":{"name":"FromTony", "email":"truong.tony@live.com"},"subject":"test subject","content":"some content"}' https://<function url>/v1/email/send
+```
 
 # Running Locally
 

@@ -41,7 +41,6 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	return api.NewResponseBuilder().
-		Body("OK").
 		Status(http.StatusOK).
 		Build(), nil
 }
