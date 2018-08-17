@@ -14,18 +14,34 @@ Work In Progress
 - [ ] Store Circuit Breaker state in a persistent store
 - [ ] Read config files from S3 instead of file (filesystem wouldn't work as is but code is there for kubernetes type deployments with an accessible file system)
 
+# Environment Variables
+
+Some of these environment variables are actually pulled in through SSM parameter store and decrypted.
+See the `serverless.yml` file to see a full list and examples of how they work per *stage*.
+
+|Variable|Description|Default|SSM Parameter|
+|---|---|---:|---:|
+|REGION|AWS Region|ap-southeast-2|No|
+|STAGE|The running environment. Available options are: local, dev and prod|dev|No|
+|SENDGRID_URL|The endpoint to call for sending messages. Should only override for environment specific mocks|https://api.sendgrid.com/v3/mail/send|No|
+|SENDGRID_API_KEY|The API key issued by SendGrid|-|Yes|
+|MAILGUN_URL|The endpoint to call for sending messages. Mailgun has sandbox specific URLs that will only send emails to verified emails unless the domain is verified.|-|No|
+|MAILGUN_API_KEY|The API key issued by Mailgun|-|Yes|
+|METRICS_COMMAND_NAME|The Hystrix context command name. Hystrix is mostly used for the timeout and code portability. State still needs to be stored to work across lambdas but that's backlogged in TODO.|EmailerAPICall|No|
+|HYSTRIX_TIMEOUT|The timeout for the HTTP calls.|20000|No|
+|HYSTRIX_MAX_CONCURRENT_REQUESTS|Maximum concurrent requests.|64|No|
+|HYSTRIX_ERROR_THRESHOLD|% of errors before the circuit breaker trips|32|No|
 
 # Deployment
 
+## 1. Get an AWS Temporary Session Token:
 With MFA enabled on the AWS account, we need to first grab a temporary session token and use it. See [AWS CLI Config Files](https://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html) on how to set up the credentials file.
-
-## 1. - Get an AWS Temporary Session Token:
 ```bash
     pip install awsmfa
     awsmfa -i <Profile>
 ```
 
-## 1.a Optional Log Forwarder
+## 1b. Optional Log Forwarder
 
 If using the log forwarder, you can first implement and deploy using this template:
 [Serverless Log Forwarder Template](https://github.com/serinth/serverless-log-forwarder)
@@ -64,6 +80,12 @@ This will build Linux ELF binaries with the addition of the configs folder so th
 
 ```bash
     serverless deploy -v --aws-profile <Profile>
+```
+
+By default the `stage` is set to `dev` if no option is specified. To override it to `local` or `prod` pass it in the serverless deploy command e.g.
+
+```bash
+    serverless deploy --stage dev -v --aws-profile <Profile>
 ```
 
 # Testing The EndPoint
