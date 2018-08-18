@@ -1,13 +1,13 @@
 package util
 
 import (
+	"errors"
+	"fmt"
 	"github.com/afex/hystrix-go/hystrix"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"fmt"
-	"errors"
 )
 
 type AuthCredentials struct {
@@ -30,7 +30,7 @@ func HystrixPost(
 
 	req, err := http.NewRequest(method, url, data)
 	if err != nil {
-		log.Panic("create new request object with error: %v", err)
+		log.Panicf("create new request object with error: %v", err)
 	}
 
 	req.Header.Add("Content-Type", mimeType)
