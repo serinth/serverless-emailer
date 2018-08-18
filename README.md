@@ -1,7 +1,8 @@
 # Serverless Emailer
 
-Work In Progress
+[![Build Status](https://travis-ci.org/serinth/serverless-emailer.svg?branch=master)](https://travis-ci.org/serinth/serverless-emailer)
 
+Serverless implementation of an emailer. It uses a primary emailer e.g. SendGrid then falls back to a secondary emailer.
 
 # TODO
 - [x] SendGrid Integration (plain/text only)
@@ -9,10 +10,10 @@ Work In Progress
 - [ ] Validate BCC and CC duplicates and return warning
 - [ ] Authentication w/ API Key Throttling
 - [ ] Analytics
-- [ ] A/B Testing, Experimentation and Feature Flagging
 - [ ] Take advantage of SendGrid's personalizations, right now only globally setting subjects and content
 - [ ] Store Circuit Breaker state in a persistent store
 - [ ] Read config files from S3 instead of file (filesystem wouldn't work as is but code is there for kubernetes type deployments with an accessible file system)
+- [ ] Fallback to a queue if primary and secondary emailers fail.
 
 # Environment Variables
 
@@ -100,6 +101,7 @@ curl -H "Content-Type: application/json" -X POST -d '{"to": [{"name":"Tony", "em
 # Running Locally
 
 Override the file defaults with these required environmental variables. Replace accordingly.
+Also modify the `local()` function to implement what to test. Serverless framework does not support Golang lambdas local invocation at the moment.
 
 ```bash
     STAGE=local SENDGRID_API_KEY='key' MAILGUN_API_KEY='key' MAILGUN_URL='mysandbox' go run functions/email/*.go

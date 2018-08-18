@@ -40,7 +40,7 @@ The bullet points below plus the TODOs on the README.md
 
 - service discovery for queue and service names
 - analytics platform to push statistics and data to which would power;
-    - A/B testing to minimize risk when rolling out and testing major changes
+    - A/B testing to minimize risk when rolling out and testing major changes (this would be a separate system)
     - Experimentation for a subset of the population for fine grained feature testing. Also a risk mitigation exercise.
     - Feature Flagging (can be combined with the above)
 - SendGrid and MailGun provide a bounces API which we can use to collect data on
